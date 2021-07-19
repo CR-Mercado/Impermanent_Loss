@@ -1,6 +1,8 @@
 # COINGECKO FUNCTIONS 
 library(jsonlite)
 library(anytime)
+library(ggplot2)
+library(plotly)
 
 # Get available tokens ----
 token_list <- fromJSON(
@@ -53,7 +55,56 @@ get_token_price_history <- function(id, date1, date2){
 
 # Last 89 days data ----
 
-eth_price_history <- get_token_price_history("ethereum", Sys.Date()-89, Sys.Date())
+eth <- get_token_price_history("ethereum", Sys.Date()-89, Sys.Date())
 wbtc <- get_token_price_history("wrapped-bitcoin", Sys.Date()-89, Sys.Date())
+
+# Diagnostics ----
+
+length_check <- function(token1, token2){ 
+  if( length(token1$prices$date_time) != length(token2$prices$date_time) ){ 
+    stop("One token has more entries than the other, cannot safely divide.")
+  }
+}
+
+time_check <- function(token1, token2){ 
+  
+  if( mean(token1$prices$date_time == token1$prices$date_time) != 1 ){ 
+    warning("Time stamps are not perfectly aligned, but will continue.
+            See: date_time_diff_plot() for diagnostics on time difference.")
+  }
+  }
+
+## Differences in date-time 
+
+date_time_diff_plot <- function(token1, token2){ 
+  
+  length_check(token1, token2)
+  
+  date_time_diff <- data.frame( 
+    UNIX_time_diff = token1$prices$date_time - token2$prices$date_time,
+    token1_time = token1$prices$date_time
+  )
+  
+  dtd <- ggplot(data = date_time_diff,
+                aes(x = token1_time, y = UNIX_time_diff)) + 
+    geom_line() + labs(x = "Token 1 Time", y = "UNIX Time Diff") + 
+    theme_classic()
+  
+  return(ggplotly(dtd))
+  }
+
+
+# Price Compare ----
+
+price_compare <- function(token1, token2){ 
+  
+  length_check(token1, token2)
+  
+ 
+  
+
+  
+  }
+
 
 
